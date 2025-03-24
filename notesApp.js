@@ -8,6 +8,7 @@ const connectDB = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
 const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret"; // Use environment variable
 
 // Middleware
@@ -133,7 +134,7 @@ app.put("/profile/:userId", async (req, res) => {
 });
 
 // Start the server (✅ Only Once)
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server is running on http://localhost:${PORT}`);
 });
 
