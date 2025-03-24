@@ -7,7 +7,11 @@ const connectDB = require("./db"); // Import MongoDB connection
 const mongoose = require("mongoose"); // Ensure mongoose is imported only once
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+// const PORT = process.env.PORT || 5001;
+
+const cors = require("cors");
+app.use(cors());
+
 
 // Middleware
 app.use(express.json());
@@ -52,7 +56,7 @@ app.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user._id }, "secret", { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.json({ token, userId: user._id, message: "Login successful. Redirecting to app..." });
 });
 
@@ -121,9 +125,9 @@ app.put("/profile/:userId", async (req, res) => {
 });
 
 // Start the server (only once!)
-app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
