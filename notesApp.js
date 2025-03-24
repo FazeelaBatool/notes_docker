@@ -3,19 +3,16 @@ const express = require("express");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const connectDB = require("./db"); // Import MongoDB connection
-const mongoose = require("mongoose"); // Ensure mongoose is imported only once
+const mongoose = require("mongoose");
+const connectDB = require("./db");
 
 const app = express();
-// const PORT = process.env.PORT || 5001;
-
-const cors = require("cors");
-app.use(cors());
-
+const PORT = process.env.PORT || 5001;
+const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret"; // Use environment variable
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public"))); 
+app.use(express.static(path.join(__dirname, "public")));
 
 // Connect to MongoDB
 connectDB();
@@ -33,37 +30,48 @@ const User = mongoose.model("User", userSchema);
 const noteSchema = new mongoose.Schema({
     title: String,
     content: String,
-    userId: mongoose.Schema.Types.ObjectId
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
 const Note = mongoose.model("Note", noteSchema);
 
 // Register User
 app.post("/signup", async (req, res) => {
-    const { username, password, email } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword, email });
-    await user.save();
-    res.json({ message: "User registered successfully. Please login." });
+    try {
+        const { username, password, email } = req.body;
+        const existingUser = await User.findOne({ username });
+        if (existingUser) return res.status(400).json({ message: "Username already exists" });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ username, password: hashedPassword, email });
+        await user.save();
+        res.json({ message: "User registered successfully. Please login." });
+    } catch (error) {
+        res.status(500).json({ error: "Error registering user" });
+    }
 });
 
 // Login User
 app.post("/login", async (req, res) => {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
+        if (!user) return res.status(400).json({ message: "User not found" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ token, userId: user._id, message: "Login successful. Redirecting to app..." });
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
+        res.json({ token, userId: user._id, message: "Login successful." });
+    } catch (error) {
+        res.status(500).json({ error: "Error logging in" });
+    }
 });
 
 // Create a new note
 app.post("/notes", async (req, res) => {
-    const { title, content, userId } = req.body;
     try {
+        const { title, content, userId } = req.body;
         const newNote = new Note({ title, content, userId });
         await newNote.save();
         res.json({ message: "Note added successfully", note: newNote });
@@ -84,8 +92,8 @@ app.get("/notes/:userId", async (req, res) => {
 
 // Update a note
 app.put("/notes/:id", async (req, res) => {
-    const { title, content } = req.body;
     try {
+        const { title, content } = req.body;
         const updatedNote = await Note.findByIdAndUpdate(req.params.id, { title, content }, { new: true });
         res.json({ message: "Note updated successfully", note: updatedNote });
     } catch (error) {
@@ -115,8 +123,8 @@ app.get("/profile/:userId", async (req, res) => {
 
 // Update user profile
 app.put("/profile/:userId", async (req, res) => {
-    const { username, email } = req.body;
     try {
+        const { username, email } = req.body;
         const updatedUser = await User.findByIdAndUpdate(req.params.userId, { username, email }, { new: true });
         res.json({ message: "Profile updated successfully", user: updatedUser });
     } catch (error) {
@@ -124,11 +132,10 @@ app.put("/profile/:userId", async (req, res) => {
     }
 });
 
-// Start the server (only once!)
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
+// Start the server (✅ Only Once)
+app.listen(PORT, () => {
+    console.log(`✅ Server is running on http://localhost:${PORT}`);
+});
 
 
 
