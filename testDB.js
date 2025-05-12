@@ -1,19 +1,25 @@
-const mongoose = require("mongoose");
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
-const uri = "mongodb+srv://admin01:OsFB7c1y1nKx64JC@cluster0.mongodb.net/notesDB?retryWrites=true&w=majority";
+const uri = "mongodb+srv://fazeelabtl:SOtyrZokcPqUFO4H@notes-cluster.ti2mn.mongodb.net/?appName=notes-cluster";
 
-mongoose.connect(uri)
-  .then(async () => {
-    console.log("✅ Connected to MongoDB Atlas!");
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
-    // Define a sample schema and model
-    const testSchema = new mongoose.Schema({ name: String });
-    const TestModel = mongoose.model("TestCollection", testSchema);
+async function run() {
+  try {
+    await client.connect();
+    await client.db("admin").command({ ping: 1 });
+    console.log("✅ Pinged your deployment. Successfully connected to MongoDB!");
+  } catch (error) {
+    console.error("❌ MongoDB Connection Error:", error.message);
+  } finally {
+    await client.close();
+  }
+}
 
-    // Insert a test document
-    await TestModel.create({ name: "MongoDB Test Document" });
-
-    console.log("✅ Test document inserted, 'notesDB' should now exist!");
-    mongoose.connection.close();
-  })
-  .catch(err => console.error("❌ MongoDB Connection Error:", err.message));
+run();
