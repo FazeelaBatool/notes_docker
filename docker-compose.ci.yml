@@ -1,0 +1,13 @@
+version: '3'
+services:
+  notes_app_ci:
+    container_name: notes_app_ci
+    image: notes_docker-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"  # Changed port to avoid conflict
+    volumes:
+      - .:/usr/src/app  # Attaching volume for code
+    restart: unless-stopped
