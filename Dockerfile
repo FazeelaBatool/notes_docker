@@ -20,6 +20,5 @@ EXPOSE 8080
 CMD ["node", "app.js"]
 
 
-# Tsting jenkins
-# Tsting jenkins again
+# Testing Jenkins
 
