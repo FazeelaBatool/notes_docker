@@ -24,4 +24,4 @@ CMD ["node", "app.js"]
 #Test webhook
 
 
-#Checking webhook+jenkins
+#Testing webhook + Jenkins together
