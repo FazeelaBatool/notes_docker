@@ -23,14 +23,5 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            echo 'Cleaning up Docker containers...'
-            script {
-                sh 'docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE down || true'
-                sh 'docker system prune -f || true'
-                sh 'docker volume prune -f || true'
-            }
-        }
-    }
+    // ❌ Removed the 'post' cleanup section
 }
