@@ -1,3 +1,4 @@
+# docker-compose.ci.yml
 version: '3'
 services:
   notes_app_ci:
@@ -7,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8081:8080"  # Changed port to avoid conflict
+      - "9090:8080"
     volumes:
-      - .:/usr/src/app  # Attaching volume for code
+      - .:/usr/src/app
     restart: unless-stopped
