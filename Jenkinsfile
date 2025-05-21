@@ -16,14 +16,14 @@ pipeline {
         stage('Build and Run Docker') {
             steps {
                 script {
-                    // Show docker versions
+                    // Display versions
                     sh 'docker --version'
                     sh 'docker-compose --version'
 
-                    // Stop and remove any existing containers to ensure clean start
+                    // Clean up previous containers
                     sh "docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE down -v --remove-orphans || true"
 
-                    // Build and run the container in detached mode
+                    // Build and run detached
                     sh "docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE up --build -d"
                 }
             }
@@ -41,15 +41,24 @@ pipeline {
                     echo "Checking if app is reachable at http://localhost:9090"
                     retry(5) {
                         sh '''
-                        curl --fail http://localhost:9090 || (
+                        if ! curl --fail http://localhost:9090; then
                             echo "App not reachable yet, waiting 10 seconds..."
                             sleep 10
                             exit 1
-                        )
+                        fi
                         '''
                     }
                 }
             }
+        }
+    }
+
+    post {
+        failure {
+            echo "Pipeline failed. Check logs above for details."
+        }
+        success {
+            echo "✅ App built and is running after webhook trigger."
         }
     }
 }
