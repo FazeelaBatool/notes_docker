@@ -16,12 +16,12 @@ pipeline {
         stage('Build and Run Docker') {
             steps {
                 script {
+                    // Use Docker Compose v2 CLI
                     sh 'docker --version || exit 1'
-                    sh 'docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE up --build -d'
+                    sh 'docker compose version || exit 1'
+                    sh 'docker compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE up --build -d'
                 }
             }
         }
     }
-
-    // ❌ Removed the 'post' cleanup section
 }
