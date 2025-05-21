@@ -9,6 +9,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9090:8080"
-    volumes:
-      - .:/usr/src/app
+    # volumes:
+    #   - .:/usr/src/app
     restart: unless-stopped
