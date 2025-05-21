@@ -1,26 +1,20 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18
+# Use an official Node.js 20 runtime as a parent image
+FROM node:20
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the package.json and package-lock.json files into the container
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install the app dependencies
+# Install app dependencies
 RUN npm install
 
-# Copy the rest of the application code into the container
+# Copy the rest of the app code
 COPY . .
 
-# Expose the port the app will run on
+# Expose port the app runs on
 EXPOSE 8080
 
-# Start the application
+# Start the app
 CMD ["node", "app.js"]
-
-
-# Testing Jenkins
-#Test webhook
-
-#webhoook
